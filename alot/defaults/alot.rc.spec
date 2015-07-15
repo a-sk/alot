@@ -212,6 +212,12 @@ mailinglists = force_list(default=list())
 # prefer plaintext alternatives over html content in multipart/alternative
 prefer_plaintext = boolean(default=False)
 
+# By default RPC system is disabled
+rpc_enabled = boolean(default=False)
+
+# full path to socket file for rpc system
+rpc_socket_path = string(default='~/.config/alot/rpc.sock')
+
 # Key bindings 
 [bindings]
     __many__ = string(default=None)

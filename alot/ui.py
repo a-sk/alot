@@ -14,6 +14,7 @@ from alot.helper import split_commandline
 from alot.helper import string_decode
 from alot.widgets.globals import CompleteEdit
 from alot.widgets.globals import ChoiceWidget
+from alot.rpc import create_rpc_server
 
 
 class UI(object):
@@ -82,6 +83,9 @@ class UI(object):
 
         logging.debug('fire first command')
         self.apply_commandline(initialcmdline)
+        if settings.get('rpc_enabled'):
+            sock_path = settings.get('rpc_socket_path')
+            create_rpc_server(self.mainloop.event_loop.reactor, self, sock_path)
 
         # start urwids mainloop
         self.mainloop.run()
