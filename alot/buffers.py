@@ -247,7 +247,12 @@ class SearchBuffer(Buffer):
                 self.proc.terminate()
 
     def rebuild(self, reverse=False):
-        self.isinitialized = True
+        if self.isinitialized:
+            focusposition = self.body.get_focus()[1]
+        else:
+            focusposition = 0
+            self.isinitialized = True
+
         self.reversed = reverse
         self.kill_filler_process()
 
@@ -274,6 +279,10 @@ class SearchBuffer(Buffer):
         self.listbox = urwid.ListBox(self.threadlist)
         self.body = self.listbox
 
+        if focusposition is not None and focusposition <= self.result_count:
+            self.consume_pipe_until(focusposition)
+            self.body.set_focus(focusposition)
+
     def get_selected_threadline(self):
         """
         returns curently focussed :class:`alot.widgets.ThreadlineWidget`
@@ -292,7 +301,14 @@ class SearchBuffer(Buffer):
 
     def consume_pipe(self):
         while not self.threadlist.empty:
-            self.threadlist._get_next_item()
+            yield self.threadlist._get_next_item()
+
+    def consume_pipe_until(self, item_num):
+        counter = 0
+        for _ in self.consume_pipe():
+            if counter >= item_num:
+                break
+            counter += 1
 
     def focus_first(self):
         if not self.reversed:
@@ -305,7 +321,7 @@ class SearchBuffer(Buffer):
             self.body.set_focus(0)
         elif (self.result_count < 200) or \
                 (self.sort_order not in self._REVERSE.keys()):
-            self.consume_pipe()
+            list(self.consume_pipe())
             num_lines = len(self.threadlist.get_lines())
             self.body.set_focus(num_lines - 1)
         else:
