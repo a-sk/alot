@@ -389,36 +389,40 @@ class ThreadBuffer(Buffer):
         self.body = TreeBox(self._nested_tree)
         self.message_count = self.thread.get_total_messages()
 
+    def _remove_unread(self, msg):
+        if 'unread' in msg.get_tags():
+            logging.debug('Tbuffer: removing unread')
+
+            def clear():
+                self._auto_unread_writing = False
+
+            msg.remove_tags(['unread'], afterwards=clear)
+            fcmd = commands.globals.FlushCommand(silent=True)
+            return self.ui.apply_command(fcmd)
+
     def render(self, size, focus=False):
-        if settings.get('auto_remove_unread'):
+        if settings.get('auto_remove_unread') or settings.get('auto_remove_unread_always'):
             logging.debug('Tbuffer: auto remove unread tag from msg?')
             msg = self.get_selected_message()
             mid = msg.get_message_id()
             focus_pos = self.body.get_focus()[1]
             summary_pos = (self.body.get_focus()[1][0], (0,))
             cursor_on_non_summary = (focus_pos != summary_pos)
-            if cursor_on_non_summary:
-                if mid not in self._auto_unread_dont_touch_mids:
-                    if 'unread' in msg.get_tags():
-                        logging.debug('Tbuffer: removing unread')
-
-                        def clear():
-                            self._auto_unread_writing = False
-
+            if settings.get('auto_remove_unread_always'):
+                self._remove_unread(msg)
+            else:
+                if cursor_on_non_summary:
+                    if mid not in self._auto_unread_dont_touch_mids:
                         self._auto_unread_dont_touch_mids.add(mid)
                         self._auto_unread_writing = True
-                        msg.remove_tags(['unread'], afterwards=clear)
-                        fcmd = commands.globals.FlushCommand(silent=True)
-                        self.ui.apply_command(fcmd)
+                        self._remove_unread(msg)
                     else:
-                        logging.debug('Tbuffer: No, msg not unread')
+                        logging.debug('Tbuffer: No, mid locked for autorm-unread')
                 else:
-                    logging.debug('Tbuffer: No, mid locked for autorm-unread')
-            else:
-                if not self._auto_unread_writing and \
-                   mid in self._auto_unread_dont_touch_mids:
-                    self._auto_unread_dont_touch_mids.remove(mid)
-                logging.debug('Tbuffer: No, cursor on summary')
+                    if not self._auto_unread_writing and \
+                    mid in self._auto_unread_dont_touch_mids:
+                        self._auto_unread_dont_touch_mids.remove(mid)
+                    logging.debug('Tbuffer: No, cursor on summary')
         return self.body.render(size, focus)
 
     def get_selected_mid(self):

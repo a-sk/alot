@@ -4,6 +4,10 @@ ask_subject = boolean(default=True) # ask for subject when compose
 # automatically remove 'unread' tag when focussing messages in thread mode
 auto_remove_unread = boolean(default=True)
 
+# automatically remove 'unread' tag when focussing messages in thread mode
+# on any part of the message
+auto_remove_unread_always = boolean(default=True)
+
 # prompt for initial tags when compose
 compose_ask_tags = boolean(default=False)
 
