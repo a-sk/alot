@@ -398,6 +398,8 @@ class UI(object):
             self.mode = buf.modename
             if isinstance(self.current_buffer, BufferlistBuffer):
                 self.current_buffer.rebuild()
+            if redraw:
+                self.current_buffer.rebuild()
             self.update()
             success = True
 
