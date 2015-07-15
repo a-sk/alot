@@ -279,7 +279,7 @@ class SearchBuffer(Buffer):
         self.listbox = urwid.ListBox(self.threadlist)
         self.body = self.listbox
 
-        if focusposition is not None and focusposition <= self.result_count:
+        if focusposition is not None and focusposition < self.result_count:
             self.consume_pipe_until(focusposition)
             self.body.set_focus(focusposition)
 
@@ -396,9 +396,12 @@ class ThreadBuffer(Buffer):
             def clear():
                 self._auto_unread_writing = False
 
+            logging.debug('Tbuffer: unread tag removed')
             msg.remove_tags(['unread'], afterwards=clear)
             fcmd = commands.globals.FlushCommand(silent=True)
             return self.ui.apply_command(fcmd)
+        else:
+            logging.debug('Tbuffer: msg is not unread')
 
     def render(self, size, focus=False):
         if settings.get('auto_remove_unread') or settings.get('auto_remove_unread_always'):
