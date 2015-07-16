@@ -282,8 +282,9 @@ class SearchBuffer(Buffer):
         threads_count = self.dbman.count_threads(self.querystring)
         if focusposition is not None and focusposition > 0:
             self.consume_pipe_until(focusposition)
-            max_focus_pos = min(focusposition, threads_count-1)
-            self.body.set_focus(max_focus_pos)
+            max_focus_pos = min(focusposition, max(0, threads_count-1))
+            if max_focus_pos:
+                self.body.set_focus(max_focus_pos)
 
     def get_selected_threadline(self):
         """
