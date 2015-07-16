@@ -279,9 +279,11 @@ class SearchBuffer(Buffer):
         self.listbox = urwid.ListBox(self.threadlist)
         self.body = self.listbox
 
-        if focusposition is not None and focusposition < self.result_count:
+        threads_count = self.dbman.count_threads(self.querystring)
+        if focusposition is not None and focusposition > 0:
             self.consume_pipe_until(focusposition)
-            self.body.set_focus(focusposition)
+            max_focus_pos = min(focusposition, threads_count-1)
+            self.body.set_focus(max_focus_pos)
 
     def get_selected_threadline(self):
         """
