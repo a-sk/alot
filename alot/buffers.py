@@ -230,7 +230,7 @@ class SearchBuffer(Buffer):
     def get_info(self):
         info = {}
         info['querystring'] = self.querystring
-        info['result_count'] = self.result_count
+        info['result_count'] = max(0, self.result_count)
         info['result_count_positive'] = 's' * (not (self.result_count == 1))
         return info
 
