@@ -282,7 +282,7 @@ def extract_body(mail, types=None):
 
         enc = part.get_content_charset() or 'ascii'
         raw_payload = part.get_payload(decode=True)
-        if ctype == 'text/plain':
+        if ctype in ['text/plain', 'text/']:
             raw_payload = string_decode(raw_payload, enc)
             body_parts.append(string_sanitize(raw_payload))
         else:
